@@ -2,7 +2,9 @@ import { create } from 'zustand';
 import { 
   Plan, 
   CreatePlanParams, 
-  UpdatePlanParams
+  UpdatePlanParams,
+  AddTaskParams,
+  Task
 } from '../types';
 import { plannerApi } from '../utils/api';
 import { devError } from '../../../lib/utils';
@@ -26,6 +28,7 @@ interface PlanState {
   updatePlan: (id: string, updates: Partial<Plan>) => Promise<void>;
   renamePlan: (id: string, newTitle: string) => Promise<void>;
   deletePlan: (id: string) => Promise<void>;
+  addTask: (params: AddTaskParams) => Promise<Task | null>;
 }
 
 export const usePlanStore = create<PlanState>((set, get) => ({
@@ -101,22 +104,34 @@ export const usePlanStore = create<PlanState>((set, get) => ({
           isLoading: false 
         }));
         return validatedPlan.id;
+      } else {
+        // API返回null，创建本地计划
+        const localPlan = plannerApi.createLocalPlan(planData);
+        
+        // 确保在UI上立即显示本地创建的计划
+        set(state => ({ 
+          plans: [...state.plans, localPlan],
+          isLoading: false 
+        }));
+        
+        devError('API创建失败，已创建本地计划:', localPlan.id);
+        return localPlan.id;
       }
-      
-      // API返回null，创建本地计划
-      const localPlan = plannerApi.createLocalPlan(planData);
-      set(state => ({ 
-        plans: [...state.plans, localPlan],
-        isLoading: false 
-      }));
-      return localPlan.id;
     } catch (error) {
       devError('Failed to add plan:', error);
-      set({ 
+      
+      // 即使API请求异常，也尝试创建本地计划，确保用户体验
+      const localPlan = plannerApi.createLocalPlan(planData);
+      
+      // 更新状态，让本地计划立即显示
+      set(state => ({ 
+        plans: [...state.plans, localPlan],
         error: error instanceof Error ? error.message : '创建计划失败',
         isLoading: false 
-      });
-      return null;
+      }));
+      
+      devError('API异常，已创建本地计划:', localPlan.id);
+      return localPlan.id; // 返回本地计划ID而不是null
     }
   },
 
@@ -206,6 +221,75 @@ export const usePlanStore = create<PlanState>((set, get) => ({
             : plan
         )
       }));
+    }
+  },
+
+  addTask: async (params: AddTaskParams) => {
+    set({ isLoading: true, error: null });
+    try {
+      // 尝试调用API添加任务
+      const newTask = await plannerApi.addTask(params);
+      
+      if (newTask) {
+        // API添加成功，更新本地状态
+        set(state => ({
+          plans: state.plans.map(plan => {
+            if (plan.id === params.planId) {
+              return {
+                ...plan,
+                stages: plan.stages.map(stage => {
+                  if (stage.id === params.stageId) {
+                    return {
+                      ...stage,
+                      tasks: [...stage.tasks, newTask]
+                    };
+                  }
+                  return stage;
+                }),
+                updatedAt: new Date()
+              };
+            }
+            return plan;
+          }),
+          isLoading: false
+        }));
+        return newTask;
+      }
+      
+      // API返回null，创建本地任务
+      const localTask = plannerApi.createLocalTask(params);
+      
+      // 更新本地状态
+      set(state => ({
+        plans: state.plans.map(plan => {
+          if (plan.id === params.planId) {
+            return {
+              ...plan,
+              stages: plan.stages.map(stage => {
+                if (stage.id === params.stageId) {
+                  return {
+                    ...stage,
+                    tasks: [...stage.tasks, localTask]
+                  };
+                }
+                return stage;
+              }),
+              updatedAt: new Date()
+            };
+          }
+          return plan;
+        }),
+        isLoading: false
+      }));
+      
+      return localTask;
+    } catch (error) {
+      devError('Failed to add task:', error);
+      set({ 
+        error: error instanceof Error ? error.message : '添加任务失败',
+        isLoading: false 
+      });
+      return null;
     }
   }
 })); 

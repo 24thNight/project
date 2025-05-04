@@ -49,7 +49,12 @@ const DashboardPage = () => {
   );
 
   useEffect(() => {
-    fetchPlans();
+    // 使用延迟加载，避免立即覆盖本地创建的计划
+    const timer = setTimeout(() => {
+      fetchPlans();
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [fetchPlans]);
 
   useEffect(() => {

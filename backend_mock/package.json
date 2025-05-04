@@ -1,0 +1,17 @@
+{
+  "name": "backend_mock",
+  "version": "1.0.0",
+  "description": "这是一个使用FastAPI构建的模拟后端服务，用于提供\"澄清问题\"功能的API。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
+}

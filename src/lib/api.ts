@@ -116,10 +116,10 @@ export const planApi = {
     try {
       // 尝试通过 API 创建
       const response = await api.post<ApiResponse<Plan>>('/plans', plan);
-      handleSuccess('create', lang);
       
       // 如果成功，返回后端返回的数据
       if (response.data && response.data.success && response.data.data) {
+        handleSuccess('create', lang);
         return response.data.data;
       }
       
@@ -128,15 +128,22 @@ export const planApi = {
         console.warn('Backend response format incorrect, creating local plan');
       }
       const localPlan = this.createLocalPlan(plan);
+      handleSuccess('create', lang);
       return localPlan;
     } catch (error) {
       if (process.env.NODE_ENV !== 'production') {
         console.error('Error creating plan via API, falling back to local creation', error);
       }
+      
       // 创建本地计划作为备份
       const localPlan = this.createLocalPlan(plan);
-      // 仍然显示成功消息，因为从用户角度看任务创建成功了
-      handleSuccess('create', lang);
+      
+      // 显示特殊的本地创建消息，而不是普通的成功消息
+      toast.info('服务器连接失败，已创建本地计划', {
+        id: 'local-plan-created',  // 使用固定ID防止多次显示
+        duration: 3000
+      });
+      
       return localPlan;
     }
   },

@@ -1,26 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Button } from '../components/ui/button';
-import AIChat, { Message } from '../components/features/ai-chat/ai-chat';
+import React, { useState } from 'react';
+import AIChat from '../components/features/ai-chat/ai-chat';
 import CommandPalette from '../components/features/command/command-palette';
+import FileExplorer from '../components/features/workspace/file-explorer';
+import FileEditor from '../components/features/workspace/file-editor';
+import ResizablePanel from '../components/features/workspace/resizable-panel';
+import Navbar from '../components/layouts/navbar';
 import { toast } from 'sonner';
+import { useLanguage } from '../lib/language-context';
+import { Command, useCommandPalette } from '../lib/hooks/use-command-palette';
 
 // 文件内容类型定义
 interface FileContents {
   [key: string]: string;
 }
 
+/**
+ * 工作空间页面
+ * 
+ * 集成式AI工作环境，可与AI助手交互，管理任务和文件
+ */
 const WorkspacePage: React.FC = () => {
+  const { t, language } = useLanguage();
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
-  const [leftSidebarWidth, setLeftSidebarWidth] = useState(256); // Default width of 64 in rem (w-64)
-  const [isLeftResizing, setIsLeftResizing] = useState(false);
-  const leftResizingRef = useRef<{ startX: number; startWidth: number } | null>(null);
-  
   const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
-  const [rightSidebarWidth, setRightSidebarWidth] = useState(384); // Default width of 96 in rem (w-96)
-  const [isResizing, setIsResizing] = useState(false);
-  const resizingRef = useRef<{ startX: number; startWidth: number } | null>(null);
   
-  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  // 文件状态
   const [openFiles, setOpenFiles] = useState(['workspace.txt']);
   const [currentFile, setCurrentFile] = useState('workspace.txt');
   const [fileContents, setFileContents] = useState<FileContents>({
@@ -49,19 +53,19 @@ const WorkspacePage: React.FC = () => {
 }`
   });
 
-  // 定义可用命令
-  const commands = [
+  // 定义命令
+  const workspaceCommands: Command[] = [
     {
       id: 'new-file',
-      name: '新建文件',
-      description: '创建一个新的文件',
+      name: language === 'zh' ? '新建文件' : 'New File',
+      description: language === 'zh' ? '创建一个新的文件' : 'Create a new file',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
         </svg>
       ),
       action: () => {
-        const fileName = prompt('请输入文件名:');
+        const fileName = prompt(language === 'zh' ? '请输入文件名:' : 'Enter file name:');
         if (fileName && !openFiles.includes(fileName)) {
           setOpenFiles(prev => [...prev, fileName]);
           setFileContents(prev => ({
@@ -69,14 +73,14 @@ const WorkspacePage: React.FC = () => {
             [fileName]: ''
           }));
           setCurrentFile(fileName);
-          toast.success(`文件 ${fileName} 已创建`);
+          toast.success(language === 'zh' ? `文件 ${fileName} 已创建` : `File ${fileName} created`);
         }
       }
     },
     {
       id: 'toggle-left-sidebar',
-      name: '切换左侧栏',
-      description: '显示或隐藏左侧文件栏',
+      name: language === 'zh' ? '切换左侧栏' : 'Toggle Left Sidebar',
+      description: language === 'zh' ? '显示或隐藏左侧文件栏' : 'Show or hide the file explorer',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
@@ -88,8 +92,8 @@ const WorkspacePage: React.FC = () => {
     },
     {
       id: 'toggle-right-sidebar',
-      name: '切换AI助手',
-      description: '显示或隐藏右侧AI助手',
+      name: language === 'zh' ? '切换AI助手' : 'Toggle AI Assistant',
+      description: language === 'zh' ? '显示或隐藏右侧AI助手' : 'Show or hide the AI assistant panel',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -101,8 +105,8 @@ const WorkspacePage: React.FC = () => {
     },
     {
       id: 'ask-ai',
-      name: '询问AI',
-      description: '直接向AI助手提问',
+      name: language === 'zh' ? '询问AI' : 'Ask AI',
+      description: language === 'zh' ? '直接向AI助手提问' : 'Ask a question to the AI assistant',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -110,23 +114,36 @@ const WorkspacePage: React.FC = () => {
       ),
       action: () => {
         setIsRightSidebarCollapsed(false);
-        toast.info('请在AI助手栏中提问');
-      }
-    },
-    {
-      id: 'go-to-dashboard',
-      name: '返回任务计划',
-      description: '返回到任务计划页面',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-        </svg>
-      ),
-      action: () => {
-        window.location.href = '/dashboard';
+        toast.info(language === 'zh' ? '请在AI助手栏中提问' : 'Please ask in the AI assistant panel');
       }
     }
   ];
+  
+  // 使用命令面板钩子
+  const { isOpen, setIsOpen, commands, executeCommand } = useCommandPalette(workspaceCommands);
+  
+  // 文件操作处理函数
+  const handleFileClick = (fileName: string) => {
+    setCurrentFile(fileName);
+  };
+  
+  const handleCreateFile = (fileName: string) => {
+    if (!openFiles.includes(fileName)) {
+      setOpenFiles(prev => [...prev, fileName]);
+      setFileContents(prev => ({
+        ...prev,
+        [fileName]: ''
+      }));
+      setCurrentFile(fileName);
+    }
+  };
+  
+  const handleContentChange = (fileName: string, content: string) => {
+    setFileContents(prev => ({
+      ...prev,
+      [fileName]: content
+    }));
+  };
 
   // 处理AI消息
   const handleSendMessage = async (message: string, references?: string[]): Promise<string> => {
@@ -179,325 +196,59 @@ const WorkspacePage: React.FC = () => {
       }, 1500);
     });
   };
-
-  // 监听快捷键
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // 检查Cmd+K或Ctrl+K
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setIsCommandPaletteOpen(true);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  // 处理左侧边栏拖拽调整宽度
-  const handleLeftResizeMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsLeftResizing(true);
-    leftResizingRef.current = {
-      startX: e.clientX,
-      startWidth: leftSidebarWidth
-    };
-  };
-
-  useEffect(() => {
-    const handleLeftResizeMouseMove = (e: MouseEvent) => {
-      if (!isLeftResizing || !leftResizingRef.current) return;
-      
-      const delta = e.clientX - leftResizingRef.current.startX;
-      const newWidth = Math.max(200, Math.min(500, leftResizingRef.current.startWidth + delta));
-      setLeftSidebarWidth(newWidth);
-    };
-
-    const handleLeftResizeMouseUp = () => {
-      setIsLeftResizing(false);
-      leftResizingRef.current = null;
-    };
-
-    if (isLeftResizing) {
-      document.addEventListener('mousemove', handleLeftResizeMouseMove);
-      document.addEventListener('mouseup', handleLeftResizeMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleLeftResizeMouseMove);
-      document.removeEventListener('mouseup', handleLeftResizeMouseUp);
-    };
-  }, [isLeftResizing]);
-
-  // 处理右侧边栏拖拽调整宽度
-  const handleResizeMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-    resizingRef.current = {
-      startX: e.clientX,
-      startWidth: rightSidebarWidth
-    };
-  };
-
-  useEffect(() => {
-    const handleResizeMouseMove = (e: MouseEvent) => {
-      if (!isResizing || !resizingRef.current) return;
-      
-      const delta = resizingRef.current.startX - e.clientX;
-      const newWidth = Math.max(280, Math.min(800, resizingRef.current.startWidth + delta));
-      setRightSidebarWidth(newWidth);
-    };
-
-    const handleResizeMouseUp = () => {
-      setIsResizing(false);
-      resizingRef.current = null;
-    };
-
-    if (isResizing) {
-      document.addEventListener('mousemove', handleResizeMouseMove);
-      document.addEventListener('mouseup', handleResizeMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleResizeMouseMove);
-      document.removeEventListener('mouseup', handleResizeMouseUp);
-    };
-  }, [isResizing]);
-
-  // 渲染行号和文本内容
-  const renderFileContent = (content: string) => {
-    const lines = content.split('\n');
-    return lines.map((line, index) => (
-      <div key={index} className="flex">
-        <div className="text-gray-400 w-10 text-right pr-4 select-none">{index + 1}</div>
-        <div>{line}</div>
-      </div>
-    ));
-  };
-
+  
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      {/* 顶部导航栏 - 统一风格与dashboard-page */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
-          {/* 左侧Logo区域 */}
-          <div className="flex items-center space-x-2">
-            <div className="bg-blue-600 text-white h-8 w-8 rounded flex items-center justify-center font-bold">
-              L
-            </div>
-            <span className="font-semibold text-lg">Linden AI</span>
-          </div>
-          
-          {/* 中间搜索栏 */}
-          <div className="hidden sm:flex flex-1 max-w-md mx-8">
-            <div 
-              className="relative w-full bg-gray-50 border border-gray-200 rounded-md flex items-center px-3 cursor-pointer"
-              onClick={() => setIsCommandPaletteOpen(true)}
-            >
-              <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <div className="w-full py-2 px-2 text-gray-400 text-sm">
-                搜索或使用命令...
-              </div>
-              <div className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">⌘K</div>
-            </div>
-          </div>
-          
-          {/* 右侧功能区 */}
-          <div className="flex items-center space-x-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-gray-700"
-            >
-              EN
-            </Button>
-
-            <Button
-              variant="outline"
-              className="border-blue-600 text-blue-600 hover:bg-blue-50"
-              onClick={() => window.location.href = '/dashboard'}
-            >
-              <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              返回任务计划
-            </Button>
-
-            <div className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center cursor-pointer">
-              <span>U</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
+      {/* 顶部导航栏 */}
+      <Navbar onOpenCommandPalette={() => setIsOpen(true)} />
+      
       {/* 主体内容 */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* 左侧边栏 - 文件浏览 */}
-        <div 
-          className={`bg-gray-800 text-white flex flex-col ${
-            isLeftSidebarCollapsed ? 'w-14' : ''
-          } ${isLeftResizing ? '' : 'transition-all duration-300'} border-r border-gray-700`}
-          style={{ width: isLeftSidebarCollapsed ? undefined : `${leftSidebarWidth}px` }}
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* 左侧文件浏览器 */}
+        <ResizablePanel
+          initialWidth={256}
+          position="left"
+          isCollapsed={isLeftSidebarCollapsed}
+          onToggleCollapse={() => setIsLeftSidebarCollapsed(!isLeftSidebarCollapsed)}
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-700">
-            <h2 className={`font-medium ${isLeftSidebarCollapsed ? 'hidden' : 'block'}`}>文件浏览器</h2>
-            <button 
-              onClick={() => setIsLeftSidebarCollapsed(!isLeftSidebarCollapsed)}
-              className="text-gray-400 hover:text-white"
-            >
-              {isLeftSidebarCollapsed ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                </svg>
-              )}
-            </button>
-          </div>
-          
-          {/* 文件树组件 */}
-          <div className="flex-1 overflow-auto p-2">
-            {!isLeftSidebarCollapsed && (
-              <div className="py-2">
-                {Object.keys(fileContents).map(fileName => (
-                  <div 
-                    key={fileName}
-                    className={`flex items-center ${fileName === currentFile ? 'text-white bg-gray-700' : 'text-gray-300 hover:text-white'} py-1 px-2 rounded hover:bg-gray-700 cursor-pointer`}
-                    onClick={() => {
-                      if (!openFiles.includes(fileName)) {
-                        setOpenFiles(prev => [...prev, fileName]);
-                      }
-                      setCurrentFile(fileName);
-                    }}
-                  >
-                    <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <span className="truncate">{fileName}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* 可调整大小的左侧分割线 */}
-        {!isLeftSidebarCollapsed && (
-          <div 
-            className={`w-1.5 hover:bg-blue-300 cursor-col-resize relative ${isLeftResizing ? 'bg-blue-400' : 'bg-transparent'}`}
-            onMouseDown={handleLeftResizeMouseDown}
-            aria-label="调整文件浏览器大小"
-          >
-            <div className="absolute inset-y-0 -left-1 -right-1" />
-          </div>
-        )}
-
-        {/* 中央工作区 - Cursor风格 */}
-        <div className="flex-1 overflow-auto bg-white flex flex-col">
-          {/* 工作区顶部标签栏 */}
-          <div className="flex items-center border-b border-gray-200 h-10 bg-gray-50">
-            {openFiles.map(file => (
-              <div 
-                key={file}
-                className={`flex items-center px-4 py-1 border-r border-gray-200 text-gray-600 text-sm font-medium cursor-pointer ${
-                  file === currentFile ? 'bg-white border-b-2 border-b-blue-500' : 'hover:bg-gray-100'
-                }`}
-                onClick={() => setCurrentFile(file)}
-              >
-                {file}
-                <button 
-                  className="ml-2 text-gray-400 hover:text-gray-600"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (openFiles.length > 1) {
-                      setOpenFiles(prev => prev.filter(f => f !== file));
-                      if (currentFile === file) {
-                        setCurrentFile(openFiles.find(f => f !== file) || '');
-                      }
-                    }
-                  }}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            ))}
-          </div>
-          
-          {/* 编辑区域 */}
-          <div className="flex-1 overflow-auto p-6">
-            <div className="max-w-4xl mx-auto">
-              <div className="font-mono text-sm text-gray-800 whitespace-pre-wrap">
-                {currentFile && fileContents[currentFile] ? 
-                  renderFileContent(fileContents[currentFile]) : 
-                  <div className="text-gray-400 text-center py-10">没有打开的文件</div>
-                }
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 可调整大小的右侧分割线 */}
-        {!isRightSidebarCollapsed && (
-          <div 
-            className={`w-1.5 hover:bg-blue-300 cursor-col-resize relative ${isResizing ? 'bg-blue-400' : 'bg-transparent'}`}
-            onMouseDown={handleResizeMouseDown}
-            aria-label="调整聊天窗口大小"
-          >
-            <div className="absolute inset-y-0 -left-1 -right-1" />
-          </div>
-        )}
-
-        {/* 右侧边栏 - AI助手 (Cursor风格) */}
-        <div 
-          className={`bg-white border-l border-gray-200 flex flex-col ${
-            isRightSidebarCollapsed ? 'w-14' : ''
-          } ${isResizing ? '' : 'transition-all duration-300'}`}
-          style={{ width: isRightSidebarCollapsed ? undefined : `${rightSidebarWidth}px` }}
+          <FileExplorer
+            openFiles={openFiles}
+            currentFile={currentFile}
+            fileContents={fileContents}
+            onFileClick={handleFileClick}
+            onCreateFile={handleCreateFile}
+          />
+        </ResizablePanel>
+        
+        {/* 中间编辑器区域 */}
+        <main className="flex-1 overflow-hidden">
+          <FileEditor
+            currentFile={currentFile}
+            fileContents={fileContents}
+            onContentChange={handleContentChange}
+          />
+        </main>
+        
+        {/* 右侧AI助手 */}
+        <ResizablePanel
+          initialWidth={384}
+          position="right"
+          isCollapsed={isRightSidebarCollapsed}
+          onToggleCollapse={() => setIsRightSidebarCollapsed(!isRightSidebarCollapsed)}
         >
-          {!isRightSidebarCollapsed && (
-            <div className="flex-1 overflow-hidden">
-              <AIChat 
-                initialMessages={[
-                  {
-                    id: '1',
-                    role: 'system',
-                    content: '您好！我是AI助手，有什么我可以帮助您的吗？您可以使用@引用文件，也可以切换智能体模式和对话模式，或者选择不同的AI模型。',
-                    timestamp: new Date()
-                  }
-                ]}
-                onSendMessage={handleSendMessage}
-                onClose={() => setIsRightSidebarCollapsed(true)}
-              />
-            </div>
-          )}
-          
-          {isRightSidebarCollapsed && (
-            <div className="h-full flex flex-col items-center pt-4">
-              <button 
-                className="text-blue-600 hover:text-blue-800"
-                onClick={() => setIsRightSidebarCollapsed(false)}
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
-              </button>
-            </div>
-          )}
-        </div>
+          <AIChat onSendMessage={handleSendMessage} />
+        </ResizablePanel>
       </div>
-
+      
       {/* 命令面板 */}
-      <CommandPalette 
-        isOpen={isCommandPaletteOpen}
-        onClose={() => setIsCommandPaletteOpen(false)}
-        commands={commands}
-      />
+      {isOpen && (
+        <CommandPalette
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          commands={commands}
+          onSelect={executeCommand}
+        />
+      )}
     </div>
   );
 };

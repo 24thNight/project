@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { usePlanStore } from '../../../lib/store';
 import { Plan, PlanStage, Task } from '../../../types/task';
 import { Button } from '../../ui/button';
 import { getProgressColor } from '../../../lib/utils';
 import { motion } from 'framer-motion';
+import NewTaskDialog from './new-task-dialog';
+import { usePlanStore } from '../../../features/task-planner/store/plan-store';
+import { toast } from 'sonner';
+import { useLanguage } from '../../../lib/language-context';
 
 interface PlanDetailViewProps {
   itemId: string | null;
@@ -11,9 +14,11 @@ interface PlanDetailViewProps {
 }
 
 const PlanDetailView: React.FC<PlanDetailViewProps> = ({ itemId, itemType }) => {
-  const { plans, getPlanById } = usePlanStore();
+  const { plans, getPlanById, addTask } = usePlanStore();
   const [selectedItem, setSelectedItem] = useState<Plan | PlanStage | Task | null>(null);
   const [parentPlan, setParentPlan] = useState<Plan | null>(null);
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const { t } = useLanguage();
   
   // 获取选中的项目和相关数据
   useEffect(() => {
@@ -55,6 +60,49 @@ const PlanDetailView: React.FC<PlanDetailViewProps> = ({ itemId, itemType }) => 
       setParentPlan(null);
     }
   }, [itemId, itemType, plans, getPlanById]);
+  
+  const handleAddTask = async (taskData: {
+    title: string;
+    description: string;
+    priority: 'high' | 'medium' | 'low';
+  }) => {
+    if (!parentPlan || !selectedItem || itemType !== 'stage') {
+      toast.error(t('task.noStageSelected'));
+      return;
+    }
+    
+    try {
+      const result = await addTask({
+        planId: parentPlan.id,
+        stageId: selectedItem.id,
+        task: {
+          title: taskData.title,
+          description: taskData.description,
+          priority: taskData.priority,
+          status: 'active',
+          completed: false
+        }
+      });
+      
+      if (result) {
+        setIsTaskDialogOpen(false);
+        toast.success(t('task.taskCreated'));
+      }
+    } catch (error) {
+      toast.error(t('task.taskCreationFailed'));
+      console.error('添加任务出错:', error);
+    }
+  };
+  
+  // 处理任务对话框打开
+  const handleOpenTaskDialog = () => {
+    setIsTaskDialogOpen(true);
+  };
+  
+  // 处理任务对话框关闭
+  const handleCloseTaskDialog = () => {
+    setIsTaskDialogOpen(false);
+  };
   
   // 如果没有选中项目，显示空状态
   if (!selectedItem) {
@@ -245,8 +293,12 @@ const PlanDetailView: React.FC<PlanDetailViewProps> = ({ itemId, itemType }) => 
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                 编辑阶段
               </Button>
-              <Button variant="outline" className="border-gray-300">
-                添加任务
+              <Button 
+                variant="outline" 
+                className="border-gray-300"
+                onClick={handleOpenTaskDialog}
+              >
+                {t('task.addTask')}
               </Button>
             </div>
           </div>
@@ -326,12 +378,24 @@ const PlanDetailView: React.FC<PlanDetailViewProps> = ({ itemId, itemType }) => 
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
               <p className="mb-4">这个阶段还没有任务</p>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                添加第一个任务
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={handleOpenTaskDialog}
+              >
+                {t('task.addFirstTask')}
               </Button>
             </div>
           )}
         </div>
+        
+        {/* 任务创建对话框 */}
+        <NewTaskDialog 
+          isOpen={isTaskDialogOpen}
+          onClose={handleCloseTaskDialog}
+          onSubmit={handleAddTask}
+          planId={parentPlan?.id || ''}
+          stageId={stage.id}
+        />
       </div>
     );
   } else {
@@ -358,13 +422,13 @@ const PlanDetailView: React.FC<PlanDetailViewProps> = ({ itemId, itemType }) => 
             </div>
             <div className="flex space-x-2">
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                编辑任务
+                {t('task.editTask')}
               </Button>
               <Button 
                 variant="outline" 
                 className={task.completed ? 'border-gray-300 text-gray-700' : 'border-green-500 text-green-700 hover:bg-green-50'}
               >
-                {task.completed ? '撤销完成' : '标记为完成'}
+                {task.completed ? t('task.undoComplete') : t('task.markComplete')}
               </Button>
             </div>
           </div>
@@ -375,7 +439,7 @@ const PlanDetailView: React.FC<PlanDetailViewProps> = ({ itemId, itemType }) => 
                 ? 'bg-green-100 text-green-800' 
                 : 'bg-blue-100 text-blue-800'
             }`}>
-              {task.completed ? '已完成' : '进行中'}
+              {task.completed ? t('task.completed') : t('task.active')}
             </div>
             
             {task.priority === 'high' && (
@@ -411,7 +475,7 @@ const PlanDetailView: React.FC<PlanDetailViewProps> = ({ itemId, itemType }) => 
               </svg>
               <p className="mb-4">这个任务还没有描述</p>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                添加描述
+                {t('task.addDescription')}
               </Button>
             </div>
           )}

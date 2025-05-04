@@ -36,11 +36,47 @@ export const translations = {
       save: "Save",
       planNamePlaceholder: "Enter plan name",
       newPlanDialog: {
-        title: "Add New Plan",
-        placeholder: "Enter something important you want to achieve...",
+        title: "Create New Plan",
+        placeholder: "E.g. Improve my coding skills, Launch a mobile app, Learn digital painting...",
         inputLabel: "Please enter an important goal you want to accomplish",
-        next: "Next"
-      }
+        next: "Next",
+        quickMode: "Quick Mode (Skip clarification questions)",
+        create: "Create Plan"
+      },
+      planCreated: "Plan created successfully",
+      planCreationFailed: "Failed to create your plan"
+    },
+    navbar: {
+      searchOrCommand: "Search or use commands...",
+      backToDashboard: "Back to Dashboard"
+    },
+    workspace: {
+      files: "Files",
+      newFile: "New File",
+      newFileDesc: "Create a new file",
+      toggleLeftSidebar: "Toggle Left Sidebar",
+      toggleLeftSidebarDesc: "Show or hide the file explorer",
+      toggleAIAssistant: "Toggle AI Assistant",
+      toggleAIAssistantDesc: "Show or hide the AI assistant panel",
+      askAI: "Ask AI",
+      askAIDesc: "Ask a question to the AI assistant",
+      askInAIAssistant: "Please ask in the AI assistant panel",
+      enterFileName: "Enter file name:",
+      fileCreated: "File {{fileName}} created",
+      fileAlreadyExists: "File {{fileName}} already exists",
+      fileContent: "File content",
+      noFileSelected: "No file selected"
+    },
+    commands: {
+      searchPlaceholder: "Type a command or search...",
+      enterToExecute: "Enter to execute",
+      noMatchingCommands: "No matching commands found",
+      navigate: "Navigate",
+      execute: "Execute",
+      close: "Close",
+      goToDashboard: "Go to Dashboard",
+      goToDashboardDesc: "Return to the task planning dashboard",
+      commandNotFound: "Command not found"
     },
     clarify: {
       title: "Planning Your Goal",
@@ -66,6 +102,33 @@ export const translations = {
         generic: "An error occurred",
         planCreationFailed: "Failed to create your plan"
       }
+    },
+    task: {
+      newTask: "Create New Task",
+      title: "Task Title",
+      description: "Task Description",
+      priority: "Priority",
+      status: "Status",
+      completed: "Completed",
+      active: "Active",
+      high: "High",
+      medium: "Medium", 
+      low: "Low",
+      titlePlaceholder: "Enter task title",
+      descriptionPlaceholder: "Enter task description (optional)",
+      titleRequired: "Title is required",
+      createTask: "Create Task",
+      processing: "Processing...",
+      cancel: "Cancel",
+      taskCreated: "Task created successfully",
+      taskCreationFailed: "Failed to create task, please try again",
+      noStageSelected: "No stage selected to add task",
+      addFirstTask: "Add first task",
+      addTask: "Add task",
+      editTask: "Edit task",
+      markComplete: "Mark as complete",
+      undoComplete: "Undo complete",
+      addDescription: "Add description"
     },
     api: {
       errors: {
@@ -131,11 +194,47 @@ export const translations = {
       save: "保存",
       planNamePlaceholder: "输入计划名称",
       newPlanDialog: {
-        title: "添加新计划",
-        placeholder: "请输入你想完成的一件大事（如：考研、写小说、找工作…）",
+        title: "创建新计划",
+        placeholder: "例如：提高编程技能、发布一个手机应用、学习数字绘画...",
         inputLabel: "请输入你想完成的一件大事",
-        next: "下一步"
-      }
+        next: "下一步",
+        quickMode: "快速模式（跳过问题澄清步骤）",
+        create: "创建计划"
+      },
+      planCreated: "计划创建成功",
+      planCreationFailed: "创建计划失败"
+    },
+    navbar: {
+      searchOrCommand: "搜索或使用命令...",
+      backToDashboard: "返回任务计划"
+    },
+    workspace: {
+      files: "文件",
+      newFile: "新建文件",
+      newFileDesc: "创建一个新的文件",
+      toggleLeftSidebar: "切换左侧栏",
+      toggleLeftSidebarDesc: "显示或隐藏左侧文件栏",
+      toggleAIAssistant: "切换AI助手",
+      toggleAIAssistantDesc: "显示或隐藏右侧AI助手",
+      askAI: "询问AI",
+      askAIDesc: "直接向AI助手提问",
+      askInAIAssistant: "请在AI助手栏中提问",
+      enterFileName: "请输入文件名:",
+      fileCreated: "文件 {{fileName}} 已创建",
+      fileAlreadyExists: "文件 {{fileName}} 已存在",
+      fileContent: "文件内容",
+      noFileSelected: "没有选择文件"
+    },
+    commands: {
+      searchPlaceholder: "输入命令或搜索...",
+      enterToExecute: "回车执行",
+      noMatchingCommands: "没有找到匹配的命令",
+      navigate: "导航",
+      execute: "执行",
+      close: "关闭",
+      goToDashboard: "返回任务计划",
+      goToDashboardDesc: "返回到任务计划页面",
+      commandNotFound: "找不到命令"
     },
     clarify: {
       title: "正在规划你的目标",
@@ -161,6 +260,33 @@ export const translations = {
         generic: "发生错误",
         planCreationFailed: "创建计划失败"
       }
+    },
+    task: {
+      newTask: "创建新任务",
+      title: "任务标题",
+      description: "任务描述",
+      priority: "优先级",
+      status: "状态",
+      completed: "已完成",
+      active: "进行中",
+      high: "高",
+      medium: "中", 
+      low: "低",
+      titlePlaceholder: "输入任务标题",
+      descriptionPlaceholder: "输入任务描述（选填）",
+      titleRequired: "标题不能为空",
+      createTask: "创建任务",
+      processing: "处理中...",
+      cancel: "取消",
+      taskCreated: "任务创建成功",
+      taskCreationFailed: "创建任务失败，请重试",
+      noStageSelected: "未选择阶段，无法添加任务",
+      addFirstTask: "添加第一个任务",
+      addTask: "添加任务",
+      editTask: "编辑任务",
+      markComplete: "标记为完成",
+      undoComplete: "撤销完成",
+      addDescription: "添加描述"
     },
     api: {
       errors: {
@@ -222,6 +348,34 @@ export type TranslationKey =
   | 'dashboard.cancel'
   | 'dashboard.save'
   | 'dashboard.planNamePlaceholder'
+  | 'dashboard.planCreated'
+  | 'dashboard.planCreationFailed'
+  | 'navbar.searchOrCommand'
+  | 'navbar.backToDashboard'
+  | 'workspace.files'
+  | 'workspace.newFile'
+  | 'workspace.newFileDesc'
+  | 'workspace.toggleLeftSidebar'
+  | 'workspace.toggleLeftSidebarDesc'
+  | 'workspace.toggleAIAssistant'
+  | 'workspace.toggleAIAssistantDesc'
+  | 'workspace.askAI'
+  | 'workspace.askAIDesc'
+  | 'workspace.askInAIAssistant'
+  | 'workspace.enterFileName'
+  | 'workspace.fileCreated'
+  | 'workspace.fileAlreadyExists'
+  | 'workspace.fileContent'
+  | 'workspace.noFileSelected'
+  | 'commands.searchPlaceholder'
+  | 'commands.enterToExecute'
+  | 'commands.noMatchingCommands'
+  | 'commands.navigate'
+  | 'commands.execute'
+  | 'commands.close'
+  | 'commands.goToDashboard'
+  | 'commands.goToDashboardDesc'
+  | 'commands.commandNotFound'
   | 'api.errors.default'
   | 'api.errors.fetch'
   | 'api.errors.create'
@@ -244,6 +398,8 @@ export type TranslationKey =
   | 'dashboard.newPlanDialog.placeholder'
   | 'dashboard.newPlanDialog.inputLabel'
   | 'dashboard.newPlanDialog.next'
+  | 'dashboard.newPlanDialog.quickMode'
+  | 'dashboard.newPlanDialog.create'
   | 'clarify.title'
   | 'clarify.yourGoal'
   | 'clarify.answerPlaceholder'
@@ -264,7 +420,32 @@ export type TranslationKey =
   | 'clarify.error.startFailed'
   | 'clarify.error.sseError'
   | 'clarify.error.generic'
-  | 'clarify.error.planCreationFailed';
+  | 'clarify.error.planCreationFailed'
+  | 'task.newTask'
+  | 'task.title'
+  | 'task.description'
+  | 'task.priority'
+  | 'task.status'
+  | 'task.completed'
+  | 'task.active'
+  | 'task.high'
+  | 'task.medium'
+  | 'task.low'
+  | 'task.titlePlaceholder'
+  | 'task.descriptionPlaceholder'
+  | 'task.titleRequired'
+  | 'task.createTask'
+  | 'task.processing'
+  | 'task.cancel'
+  | 'task.taskCreated'
+  | 'task.taskCreationFailed'
+  | 'task.noStageSelected'
+  | 'task.addFirstTask'
+  | 'task.addTask'
+  | 'task.editTask'
+  | 'task.markComplete'
+  | 'task.undoComplete'
+  | 'task.addDescription';
 
 export function t(key: TranslationKey, lang: Language = 'en'): string {
   const keys = key.split('.');

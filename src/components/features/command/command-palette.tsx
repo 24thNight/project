@@ -1,26 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '../../ui/input';
-
-interface Command {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  action: () => void;
-}
+import { Command } from '../../../lib/hooks/use-command-palette';
+import { useLanguage } from '../../../lib/language-context';
 
 interface CommandPaletteProps {
   isOpen: boolean;
-  onClose: () => void;
+  setIsOpen: (isOpen: boolean) => void;
   commands: Command[];
+  onSelect: (commandId: string) => void;
 }
 
 const CommandPalette: React.FC<CommandPaletteProps> = ({ 
   isOpen, 
-  onClose,
-  commands = []
+  setIsOpen,
+  commands = [],
+  onSelect
 }) => {
+  const { language } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -59,7 +56,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
         break;
       case 'Escape':
         e.preventDefault();
-        onClose();
+        handleClose();
         break;
       default:
         break;
@@ -68,15 +65,20 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
   
   // 执行命令
   const executeCommand = (command: Command) => {
-    command.action();
-    onClose();
+    onSelect(command.id);
+    handleClose();
+  };
+  
+  const handleClose = () => {
+    setIsOpen(false);
     setSearchTerm('');
+    setSelectedIndex(0);
   };
   
   // 点击背景关闭
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      onClose();
+      handleClose();
     }
   };
 
@@ -112,7 +114,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
                 <Input
                   ref={inputRef}
                   type="text"
-                  placeholder="输入命令或搜索..."
+                  placeholder={language === 'zh' ? '输入命令或搜索...' : 'Type a command or search...'}
                   className="flex-1 border-none focus:ring-0 text-lg"
                   value={searchTerm}
                   onChange={(e) => {
@@ -145,7 +147,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
                       </div>
                       {selectedIndex === index && (
                         <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">
-                          回车执行
+                          {language === 'zh' ? '回车执行' : 'Enter to execute'}
                         </span>
                       )}
                     </li>
@@ -156,7 +158,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
                   <svg className="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <p>没有找到匹配的命令</p>
+                  <p>{language === 'zh' ? '没有找到匹配的命令' : 'No matching commands found'}</p>
                 </div>
               )}
             </div>
@@ -166,17 +168,17 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
                 <span className="flex items-center">
                   <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-300 mr-1">↑</kbd>
                   <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-300 mr-1">↓</kbd>
-                  <span>导航</span>
+                  <span>{language === 'zh' ? '导航' : 'Navigate'}</span>
                 </span>
                 <span className="flex items-center">
                   <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-300 mr-1">Enter</kbd>
-                  <span>执行</span>
+                  <span>{language === 'zh' ? '执行' : 'Execute'}</span>
                 </span>
               </div>
               
               <span className="flex items-center">
                 <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-300 mr-1">Esc</kbd>
-                <span>关闭</span>
+                <span>{language === 'zh' ? '关闭' : 'Close'}</span>
               </span>
             </div>
           </motion.div>

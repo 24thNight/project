@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Plan, CreatePlanParams, UpdatePlanParams } from '../types';
+import { Plan, CreatePlanParams, UpdatePlanParams, AddTaskParams, Task } from '../types';
 import { toast } from 'sonner';
 import { devError } from '../../../lib/utils';
 
@@ -63,7 +63,8 @@ export const plannerApi = {
       return response.data.data;
     } catch (error) {
       devError('Error creating plan:', error);
-      toast.error('创建计划失败');
+      // 简化错误处理
+      toast.error('服务器连接失败，已创建本地计划');
       return null;
     }
   },
@@ -96,6 +97,38 @@ export const plannerApi = {
       toast.error('删除计划失败');
       return false;
     }
+  },
+
+  /**
+   * 添加任务到阶段
+   */
+  async addTask(params: AddTaskParams): Promise<Task | null> {
+    try {
+      const { planId, stageId, task } = params;
+      const response = await api.post<ApiResponse<Task>>(`/plans/${planId}/stages/${stageId}/tasks`, task);
+      toast.success('任务创建成功');
+      return response.data.data;
+    } catch (error) {
+      devError('Error creating task:', error);
+      toast.error('创建任务失败');
+      return null;
+    }
+  },
+
+  /**
+   * 创建本地任务（无需API）
+   */
+  createLocalTask(params: AddTaskParams): Task {
+    const id = `task-${Date.now()}`;
+    
+    return {
+      id,
+      title: params.task.title,
+      description: params.task.description || "",
+      status: params.task.status || "active",
+      priority: params.task.priority || "medium",
+      completed: false,
+    };
   },
 
   /**

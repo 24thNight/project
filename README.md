@@ -14,6 +14,9 @@
 - 📱 响应式设计，支持移动端与桌面端
 - 🗑️ 回收站功能
 - 🔔 操作反馈通知
+- 💬 AI助手对话式任务规划
+- 🔎 智能命令面板
+- 📝 集成式工作空间
 
 ## 技术栈
 
@@ -21,26 +24,47 @@
 - **状态管理**: Zustand
 - **样式**: Tailwind CSS + shadcn/ui
 - **动画**: Framer Motion
-- **国际化**: 自定义 i18n 实现
+- **国际化**: react-i18next
 - **HTTP 客户端**: Axios
 - **通知**: Sonner Toast
+- **路由**: React Router v6
 
 ## 项目结构
 
 ```
-src/
-├── components/            # UI组件
-│   ├── ui/                # 基础UI组件
-│   └── features/          # 功能组件
-│       └── dashboard/     # 工作台相关组件
-├── pages/                 # 页面组件
-├── lib/                   # 工具函数和服务
-│   ├── api.ts             # API服务
-│   ├── store.ts           # 状态管理
-│   ├── i18n.ts            # 国际化
-│   └── utils.ts           # 通用工具函数
-└── types/                 # TypeScript类型定义
+/
+├── public/                # 静态资源
+└── src/                   # 源代码
+    ├── components/        # UI组件
+    │   ├── ui/            # 基础UI组件
+    │   ├── features/      # 功能组件
+    │   │   ├── dashboard/ # 工作台相关组件
+    │   │   ├── ai-chat/   # AI助手组件
+    │   │   ├── plan-tree/ # 计划树组件
+    │   │   ├── workspace/ # 工作空间组件
+    │   │   └── command/   # 命令面板组件
+    │   ├── layouts/       # 布局组件
+    │   └── icons/         # 图标组件
+    ├── pages/             # 页面组件
+    │   ├── dashboard-page.tsx # 仪表盘页面
+    │   ├── plan-page.tsx      # 计划详情页面
+    │   ├── workspace-page.tsx # 工作空间页面
+    │   ├── clarify-page.tsx   # 任务澄清页面
+    │   └── clarification-page.tsx # 澄清过程页面
+    ├── lib/               # 工具函数和服务
+    │   ├── api.ts         # API服务
+    │   ├── store.ts       # 状态管理
+    │   ├── i18n.ts        # 国际化
+    │   └── utils.ts       # 通用工具函数
+    └── types/             # TypeScript类型定义
 ```
+
+## 主要页面
+
+- **工作空间页面**: 集成式AI工作环境，可与AI助手交互，管理任务和文件
+- **仪表盘页面**: 展示所有任务计划的概览，包括进度和优先级
+- **计划详情页面**: 显示单个计划的详细信息和阶段
+- **澄清页面**: 通过问答方式明确任务目标和需求
 
 ## 安装与运行
 
@@ -78,6 +102,28 @@ npm run build
 yarn build
 ```
 
+## AI 功能集成
+
+项目集成了AI助手功能，可以：
+
+- 向AI提问关于任务管理的问题
+- 获取任务拆解和优化建议
+- 分析项目文件和代码
+- 引用文件内容进行上下文交流
+
+使用方法：
+1. 在工作空间页面右侧AI助手中提问
+2. 使用@符号引用文件和资源
+3. 通过命令面板快速访问AI功能
+
+## 命令面板
+
+使用⌘K或Ctrl+K快捷键打开命令面板，可快速执行以下操作：
+- 新建文件
+- 切换侧边栏
+- 询问AI助手
+- 返回任务计划页面
+
 ## API 集成
 
 ### 配置 API 地址
@@ -102,55 +148,7 @@ REACT_APP_API_URL=http://your-backend-api.com/api
 }
 ```
 
-### 后端接口列表
-
-前端需要后端实现以下 API 端点：
-
-| 方法   | 路径                     | 描述                 | 请求体                    | 响应                        |
-|--------|--------------------------|----------------------|--------------------------|------------------------------|
-| GET    | /plans                   | 获取所有计划         | -                         | { success: true, data: Plan[] } |
-| GET    | /plans/:id               | 获取单个计划         | -                         | { success: true, data: Plan }   |
-| POST   | /plans                   | 创建新计划           | { title, description, ... }| { success: true, data: Plan }   |
-| PUT    | /plans/:id               | 更新计划             | { ...updates }            | { success: true, data: Plan }   |
-| PATCH  | /plans/:id/rename        | 重命名计划           | { title: string }         | { success: true, data: Plan }   |
-| DELETE | /plans/:id               | 删除计划             | -                         | { success: true, data: null }   |
-| GET    | /plans/:id/current-stage | 获取计划当前阶段     | -                         | { success: true, data: Stage }  |
-
-### 使用示例
-
-```typescript
-// 通过Zustand store使用API
-import { usePlanStore } from './lib/store';
-
-function MyComponent() {
-  const { plans, fetchPlans, addPlan } = usePlanStore();
-  
-  // 获取所有计划
-  useEffect(() => {
-    fetchPlans();
-  }, []);
-  
-  // 创建新计划
-  const handleCreatePlan = async () => {
-    await addPlan({ title: '新计划' });
-  };
-  
-  return (
-    <div>
-      {plans.map(plan => (
-        <div key={plan.id}>{plan.title}</div>
-      ))}
-      <button onClick={handleCreatePlan}>创建新计划</button>
-    </div>
-  );
-}
-```
-
-### API 测试工具
-
-访问 `/api-test` 路径可以使用内置的 API 测试工具，测试各个接口的功能和返回数据。
-
-## 离线支持
+### 离线支持机制
 
 应用实现了离线容错机制：
 
@@ -160,11 +158,20 @@ function MyComponent() {
 
 ## 多语言支持
 
-应用支持中文和英文两种语言，可通过顶部导航栏切换。所有界面文本和消息都支持国际化。
+应用使用react-i18next实现中文和英文两种语言支持：
 
-## 开发指南
+- 默认使用英文
+- 所有界面文本使用i18n配置
+- 使用`t('key')`调用文本
+- 通过语言上下文提供器(LanguageProvider)管理语言切换
 
-更多详细的开发指南请查看 [src/lib/README.md](src/lib/README.md)。
+## 代码组织最佳实践
+
+- **组件拆分原则**: 组件应当保持简洁，每个组件职责单一，避免超过300行的大型组件
+- **状态管理**: 页面组件应尽量保持无状态，通过props或Zustand store获取数据
+- **关注点分离**: UI渲染与业务逻辑应当分离，业务逻辑放在hooks或store中
+- **类型安全**: 避免使用any类型，为所有props和状态定义明确的接口
+- **组件接口**: 每个组件应当有明确的props接口定义，包含必要的文档注释
 
 ## 贡献
 

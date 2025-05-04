@@ -46,15 +46,32 @@ export const usePlanStore = create<PlanState>((set, get) => ({
         stages: plan.stages || []
       }));
       
+      // 如果服务器返回空列表，但本地已有计划，则保留本地计划
+      if (validatedPlans.length === 0 && get().plans.length > 0) {
+        console.warn('Server returned empty plans list, keeping local plans');
+        set({ isLoading: false });
+        return;
+      }
+      
       set({ plans: validatedPlans, isLoading: false });
     } catch (error) {
       console.error('Failed to fetch plans:', error);
-      set({ 
-        error: error instanceof Error ? error.message : '获取计划失败', 
-        isLoading: false,
-        // 如果API失败，使用mock数据作为后备
-        plans: mockPlans
-      });
+      
+      // 如果已有本地计划数据，则保持本地数据不变，不替换为mock数据
+      if (get().plans.length > 0) {
+        set({ 
+          error: error instanceof Error ? error.message : '获取计划失败', 
+          isLoading: false
+        });
+      } else {
+        // 只有在本地没有数据时才使用mock数据
+        set({ 
+          error: error instanceof Error ? error.message : '获取计划失败', 
+          isLoading: false,
+          // 如果API失败且本地没有数据，使用mock数据作为后备
+          plans: mockPlans
+        });
+      }
     }
   },
 
