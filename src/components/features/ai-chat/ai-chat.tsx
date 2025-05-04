@@ -295,22 +295,29 @@ const AIChat: React.FC<AIChatProps> = ({
 
   return (
     <div className="flex flex-col h-full bg-white text-gray-800" ref={chatContainerRef}>
-      {/* Cursor风格头部 */}
-      <div className="px-3 py-2.5 flex justify-between items-center bg-gray-50">
-        <div className="flex-1 text-xs font-medium text-gray-700 truncate">AI 助手</div>
-        <div className="flex items-center space-x-2">
+      {/* 修改后的头部样式 - 使用更简单的图标 */}
+      <div className="flex justify-between items-center px-4 py-3 bg-gray-50 border-b border-gray-200">
+        <div className="flex items-center gap-2.5 text-sm font-medium text-gray-700">
+          {/* 使用更简单的AI图标 */}
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M12 4.5v2M19.5 12h-2M12 19.5v-2M4.5 12h2M16.5 7.5l-1.5 1.5M7.5 16.5l1.5-1.5M16.5 16.5l-1.5-1.5M7.5 7.5l1.5 1.5M12 12a3 3 0 100-6 3 3 0 000 6z" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="relative" style={{ top: '0.5px' }}>AI 助手</span>
+        </div>
+        <div className="flex items-center gap-2">
           {/* 模型选择下拉菜单 */}
           <div className="relative" ref={modelDropdownRef}>
             <button 
-              className="h-7 text-xs rounded flex items-center px-2 bg-white hover:bg-gray-100 text-gray-700 border border-gray-300"
+              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 rounded-md shadow-sm"
               onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
+              aria-label="选择AI模型"
             >
-              <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
               <span className="hidden sm:inline">{selectedModel}</span>
-              <span className="sm:hidden">AI</span>
-              <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span className="sm:inline sm:hidden">AI</span>
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
@@ -359,12 +366,13 @@ const AIChat: React.FC<AIChatProps> = ({
           {/* 模式选择下拉菜单 */}
           <div className="relative" ref={modeDropdownRef}>
             <button 
-              className="h-7 text-xs rounded flex items-center px-2 bg-white hover:bg-gray-100 text-gray-700 border border-gray-300"
+              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 rounded-md shadow-sm"
               onClick={() => setIsModeDropdownOpen(!isModeDropdownOpen)}
+              aria-label="选择AI模式"
             >
               <span className="hidden sm:inline">{getModeLabel()}</span>
-              <span className="sm:hidden">模式</span>
-              <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span className="sm:inline sm:hidden">模式</span>
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
@@ -414,11 +422,11 @@ const AIChat: React.FC<AIChatProps> = ({
           {onClose && (
             <button 
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
+              className="flex items-center px-3 py-1.5 text-sm bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 rounded-md shadow-sm"
               aria-label="关闭AI助手"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           )}

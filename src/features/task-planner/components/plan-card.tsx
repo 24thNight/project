@@ -92,9 +92,9 @@ export const PlanCard: React.FC<PlanCardProps> = ({
             variant="zen" 
             size="sm"
             onClick={() => onEnter(plan.id)}
-            aria-label={`进入 ${plan.title}`}
+            aria-label={`打开 ${plan.title}`}
           >
-            进入
+            打开
           </Button>
         )}
         

@@ -1,0 +1,22 @@
+{
+  "plans": [
+    {
+      "id": "plan-1746351591355",
+      "title": "呃呃呃",
+      "description": "",
+      "currentStageId": "stage-1746351591355",
+      "stages": [
+        {
+          "id": "stage-1746351591355",
+          "title": "第一阶段",
+          "completed": false,
+          "tasks": []
+        }
+      ],
+      "createdAt": "2025-05-04T09:39:51.355Z",
+      "updatedAt": "2025-05-04T09:39:51.355Z",
+      "status": "ongoing",
+      "progress": 0
+    }
+  ]
+}

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import AIChat from '../components/features/ai-chat/ai-chat';
 import CommandPalette from '../components/features/command/command-palette';
 import FileExplorer from '../components/features/workspace/file-explorer';
@@ -8,6 +9,7 @@ import Navbar from '../components/layouts/navbar';
 import { toast } from 'sonner';
 import { useLanguage } from '../lib/language-context';
 import { Command, useCommandPalette } from '../lib/hooks/use-command-palette';
+import { usePlanStore } from '../lib/store';
 
 // 文件内容类型定义
 interface FileContents {
@@ -21,6 +23,12 @@ interface FileContents {
  */
 const WorkspacePage: React.FC = () => {
   const { t, language } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const planId = searchParams.get('planId');
+  const { getPlanById } = usePlanStore();
+  
+  // 所有状态定义放在最前面
+  const [planTitle, setPlanTitle] = useState<string | null>(null);
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
   const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
   
@@ -52,7 +60,52 @@ const WorkspacePage: React.FC = () => {
   }
 }`
   });
+  
+  // 加载任务信息 - 移到状态定义之后
+  useEffect(() => {
+    if (planId) {
+      const plan = getPlanById(planId);
+      if (plan) {
+        // 设置计划标题，用于左侧栏显示
+        console.log('加载任务信息:', plan.title);
+        setPlanTitle(plan.title);
+        
+        // 创建任务特定的工作区文件
+        const taskWorkspaceContent = `# ${plan.title} - AI 工作区
 
+这是与"${plan.title}"任务相关的工作区，你可以：
+- 向AI提出关于此任务的问题
+- 获取关于任务拆解的建议
+- 使用AI协助管理和优化你的任务计划
+
+## 使用方法
+
+1. 在右侧AI助手中提问
+2. 使用⌘K打开命令面板
+3. 使用@符号引用文件和资源`;
+
+        // 更新文件内容
+        setFileContents(prev => ({
+          ...prev,
+          'workspace.txt': taskWorkspaceContent
+        }));
+      } else {
+        console.log('找不到指定ID的任务:', planId);
+        // 默认设置一个项目名称
+        setPlanTitle('项目文件');
+      }
+    } else {
+      console.log('没有提供任务ID');
+      // 默认设置一个项目名称
+      setPlanTitle('项目文件');
+    }
+  }, [planId, getPlanById]);
+  
+  // 监听planTitle的变化
+  useEffect(() => {
+    console.log('planTitle更新为:', planTitle);
+  }, [planTitle]);
+  
   // 定义命令
   const workspaceCommands: Command[] = [
     {
@@ -127,7 +180,7 @@ const WorkspacePage: React.FC = () => {
     setCurrentFile(fileName);
   };
   
-  const handleCreateFile = (fileName: string) => {
+  const handleCreateFile = (fileName: string, parentPath?: string) => {
     if (!openFiles.includes(fileName)) {
       setOpenFiles(prev => [...prev, fileName]);
       setFileContents(prev => ({
@@ -217,6 +270,7 @@ const WorkspacePage: React.FC = () => {
             fileContents={fileContents}
             onFileClick={handleFileClick}
             onCreateFile={handleCreateFile}
+            planTitle={planTitle}
           />
         </ResizablePanel>
         

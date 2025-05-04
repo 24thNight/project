@@ -5,7 +5,7 @@ import { t } from './i18n';
 import { Language } from './i18n';
 
 // API base URL - should be configured based on environment
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://jjnucnlvlsaj.sealoshzh.site';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 // Create axios instance
 const api = axios.create({

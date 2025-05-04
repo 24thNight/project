@@ -169,7 +169,7 @@ export const translations = {
       noStage: "无阶段",
       search: "搜索计划",
       actions: {
-        enter: "进入",
+        enter: "打开",
         summary: "总结",
         delete: "删除",
         rename: "重命名"
