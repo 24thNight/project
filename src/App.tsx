@@ -6,6 +6,7 @@ import DashboardPage from './pages/dashboard-page';
 import ClarifyPage from './pages/clarify-page';
 import PlanPage from './pages/plan-page';
 import ApiTest from './components/features/dashboard/api-test';
+import ClarificationPage from './pages/clarification-page';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Routes>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/clarify" element={<ClarifyPage />} />
+          <Route path="/clarify-new" element={<ClarificationPage />} />
           <Route path="/plan" element={<PlanPage />} />
           <Route path="/api-test" element={<ApiTest />} />
           {/* Redirect to dashboard for now, these pages would be implemented later */}

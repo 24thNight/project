@@ -5,18 +5,26 @@ import NewPlanDialog from './new-plan-dialog';
 
 interface NewPlanCardProps {
   onPlanCreated?: () => void;
+  onOpenDialog?: () => void;
 }
 
-const NewPlanCard: React.FC<NewPlanCardProps> = ({ onPlanCreated }) => {
+const NewPlanCard: React.FC<NewPlanCardProps> = ({ onPlanCreated, onOpenDialog }) => {
   const { t } = useLanguage();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleOpenDialog = () => {
-    setIsDialogOpen(true);
+    if (onOpenDialog) {
+      onOpenDialog();
+    } else {
+      setIsDialogOpen(true);
+    }
   };
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
+    if (onPlanCreated) {
+      onPlanCreated();
+    }
   };
 
   return (
@@ -47,10 +55,12 @@ const NewPlanCard: React.FC<NewPlanCardProps> = ({ onPlanCreated }) => {
         <p className="text-xs text-gray-400 mt-2 text-center">{t('dashboard.clickToAdd')}</p>
       </Card>
 
-      <NewPlanDialog
-        isOpen={isDialogOpen}
-        onClose={handleCloseDialog}
-      />
+      {!onOpenDialog && (
+        <NewPlanDialog
+          isOpen={isDialogOpen}
+          onClose={handleCloseDialog}
+        />
+      )}
     </>
   );
 };

@@ -26,8 +26,8 @@ const PlanCard: React.FC<PlanCardProps> = ({
 
   return (
     <>
-      <Card className="h-full transition-all duration-300 hover:shadow-md relative group">
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <Card className="h-full relative group">
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100">
           <Button
             variant="ghost"
             size="sm"

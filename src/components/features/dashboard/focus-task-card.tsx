@@ -14,9 +14,11 @@ const FocusTaskCard: React.FC<FocusTaskCardProps> = ({ plan, onEnter }) => {
   const { t } = useLanguage();
   
   if (!plan || !plan.stages) {
-    console.error('FocusTaskCard received invalid plan:', plan);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('FocusTaskCard received invalid plan:', plan);
+    }
     return (
-      <Card className="w-full max-w-2xl mx-auto bg-white border-0 shadow-xl p-4">
+      <Card className="w-full max-w-2xl mx-auto bg-white border-0 shadow-sm p-4">
         <p className="text-center text-gray-500">数据加载中...</p>
       </Card>
     );
@@ -26,7 +28,7 @@ const FocusTaskCard: React.FC<FocusTaskCardProps> = ({ plan, onEnter }) => {
   const activeTasks = stage?.tasks?.filter(t => !t.completed)?.length || 0;
 
   return (
-    <Card className="w-full max-w-2xl mx-auto bg-white border-0 shadow-xl">
+    <Card className="w-full max-w-2xl mx-auto bg-white border-0">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <CardTitle>{plan.title}</CardTitle>

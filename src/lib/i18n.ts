@@ -53,11 +53,17 @@ export const translations = {
       loadingQuestions: "Loading questions...",
       waitingNext: "Waiting for the next question...",
       allQuestionsAnswered: "All questions answered. Preparing your plan...",
+      waitingMoreQuestions: "Please wait for more questions from the AI",
+      answerAllFirst: "Please answer all questions first",
+      allQuestionsReceived: "All questions received! You can continue when you've answered all questions.",
+      pleaseAnswerAll: "Please complete all questions before continuing",
+      generatingPlan: "Generating your plan...",
       error: {
         missingTitle: "Missing task title",
         startFailed: "Failed to start clarification process",
         sseError: "Error connecting to the server",
-        generic: "An error occurred"
+        generic: "An error occurred",
+        planCreationFailed: "Failed to create your plan"
       }
     },
     api: {
@@ -141,11 +147,17 @@ export const translations = {
       loadingQuestions: "正在加载问题...",
       waitingNext: "等待下一个问题...",
       allQuestionsAnswered: "所有问题已回答完毕，正在准备你的计划...",
+      waitingMoreQuestions: "请等待AI提出更多问题",
+      answerAllFirst: "请先回答所有问题",
+      allQuestionsReceived: "所有问题已接收完毕！完成所有问题后即可继续。",
+      pleaseAnswerAll: "请在继续前完成所有问题",
+      generatingPlan: "正在生成你的计划...",
       error: {
         missingTitle: "缺少任务标题",
         startFailed: "启动澄清过程失败",
         sseError: "连接服务器时出错",
-        generic: "发生错误"
+        generic: "发生错误",
+        planCreationFailed: "创建计划失败"
       }
     },
     api: {
@@ -240,10 +252,16 @@ export type TranslationKey =
   | 'clarify.loadingQuestions'
   | 'clarify.waitingNext'
   | 'clarify.allQuestionsAnswered'
+  | 'clarify.waitingMoreQuestions'
+  | 'clarify.answerAllFirst'
+  | 'clarify.allQuestionsReceived'
+  | 'clarify.pleaseAnswerAll'
+  | 'clarify.generatingPlan'
   | 'clarify.error.missingTitle'
   | 'clarify.error.startFailed'
   | 'clarify.error.sseError'
-  | 'clarify.error.generic';
+  | 'clarify.error.generic'
+  | 'clarify.error.planCreationFailed';
 
 export function t(key: TranslationKey, lang: Language = 'en'): string {
   const keys = key.split('.');

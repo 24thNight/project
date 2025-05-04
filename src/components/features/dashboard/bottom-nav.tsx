@@ -60,22 +60,22 @@ const TopNav: React.FC<TopNavProps> = ({ activeTab, onChangeTab }) => {
   ];
 
   return (
-    <div className="mx-auto px-4 py-3 rounded-full bg-white/80 backdrop-blur-md shadow-xl border border-gray-200 inline-block">
+    <div className="mx-auto px-4 py-3 rounded-full bg-white border border-gray-200 inline-block shadow-sm">
       <div className="flex space-x-8 items-center">
         {navItems.map((item) => (
           <button
             key={item.id}
             className={cn(
-              "flex flex-col items-center justify-center transition-all outline-none",
+              "flex flex-col items-center justify-center outline-none",
               activeTab === item.id 
-                ? "text-gray-900 scale-110" 
+                ? "text-gray-900" 
                 : "text-gray-400 hover:text-gray-600"
             )}
             onClick={() => onChangeTab(item.id)}
             aria-label={t(item.label)}
           >
             <div className={cn(
-              "p-2 rounded-full transition-all", 
+              "p-2 rounded-full", 
               activeTab === item.id 
                 ? "bg-gray-100"
                 : "hover:bg-gray-50"

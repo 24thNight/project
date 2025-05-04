@@ -56,9 +56,21 @@ const ClarifyPage: React.FC = () => {
     setTaskTitle(decodedTitle);
     setIsLoading(true);
 
+    // 创建清理函数，确保在任何情况下都能关闭SSE连接
+    const cleanupSSE = () => {
+      if (eventSourceRef.current) {
+        devLog('[ClarifyPage] Cleaning up SSE connection');
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+    };
+
     // Function to start the process
     const startClarification = async () => {
       try {
+        // Close previous connection if exists before starting a new one
+        cleanupSSE();
+
         // 1. Send POST request to start backend process
         devLog('[ClarifyPage] Sending POST /api/clarify/start');
         const postResponse = await fetch(`${API_BASE_URL}/api/clarify/start`, {
@@ -94,8 +106,7 @@ const ClarifyPage: React.FC = () => {
           if (event.data === '[END]') {
             devLog('[ClarifyPage] SSE Received [END] marker');
             setIsEnded(true);
-            es.close();
-            devLog('[ClarifyPage] SSE Connection Closed by client');
+            cleanupSSE(); // 使用统一的清理函数
           } else {
             // Add new question
             setQuestions(prev => [...prev, event.data]);
@@ -107,10 +118,7 @@ const ClarifyPage: React.FC = () => {
           toast.error(t('clarify.error.sseError'));
           setIsLoading(false);
           setIsEnded(true); // Assume ended on error to prevent getting stuck
-          if (es) {
-            es.close();
-            devLog('[ClarifyPage] SSE Connection Closed due to error');
-          }
+          cleanupSSE(); // 使用统一的清理函数
         };
 
       } catch (error) {
@@ -124,14 +132,8 @@ const ClarifyPage: React.FC = () => {
 
     startClarification();
 
-    // Cleanup function
-    return () => {
-      if (eventSourceRef.current) {
-        devLog('[ClarifyPage] Cleaning up SSE connection');
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
-      }
-    };
+    // 组件卸载时清理
+    return cleanupSSE;
   }, [searchParams, navigate, t]);
 
   // Effect for Navigation when finished
@@ -147,7 +149,7 @@ const ClarifyPage: React.FC = () => {
         navigate('/plan', {
           state: { taskTitle, answers: finalAnswers, questions } as ClarifyPageState
         });
-      }, 500); // Small delay
+      }, 300); // 减少延迟时间
       return () => clearTimeout(timer);
     }
   }, [currentIndex, questions, answers, isEnded, taskTitle, navigate]);
@@ -194,7 +196,7 @@ const ClarifyPage: React.FC = () => {
         {/* Loading State */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-4"></div>
+            <div className="rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-4"></div>
             <p className="text-gray-600">{t('clarify.loadingQuestions')}</p>
           </div>
         )}
@@ -230,7 +232,7 @@ const ClarifyPage: React.FC = () => {
                             onChange={(e) => setCurrentInput(e.target.value)}
                             onKeyDown={handleKeyDown}
                             placeholder={t('clarify.answerPlaceholder')}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             disabled={currentIndex !== index || isEnded} // Disable if not current or ended
                             aria-label={`Answer to question ${index + 1}`}
                           />

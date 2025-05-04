@@ -4,13 +4,20 @@ import { useLanguage } from '../../../lib/language-context';
 import { Button } from '../../../components/ui/button';
 import { toast } from 'sonner';
 
+// 日志辅助函数
+const devLog = (message: string, ...args: any[]) => {
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(message, ...args);
+  }
+};
+
 interface NewPlanDialogProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 const NewPlanDialog: React.FC<NewPlanDialogProps> = ({ isOpen, onClose }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [userInput, setUserInput] = useState('');
   
@@ -40,15 +47,32 @@ const NewPlanDialog: React.FC<NewPlanDialogProps> = ({ isOpen, onClose }) => {
   const handleNext = () => {
     if (!userInput.trim()) return;
     
-    const targetUrl = `/clarify?taskTitle=${encodeURIComponent(userInput.trim())}`;
-    console.log(`[Dialog] Preparing to navigate to: ${targetUrl}`);
+    devLog(`[Dialog] Preparing to navigate to clarification page with goal: ${userInput.trim()}`);
     
-    // 先进行导航
-    console.log("[Dialog] Calling navigate...");
-    navigate(targetUrl);
-    console.log("[Dialog] navigate call finished.");
+    // 获取当前URL中的查询参数，如果有的话保留
+    const searchParams = new URLSearchParams(window.location.search);
     
-    // 然后关闭对话框
+    // 在开发环境下添加 useMock=true 参数
+    if (process.env.NODE_ENV !== 'production') {
+      // 只有在没有明确设置为false的情况下才设置为true
+      if (searchParams.get('useMock') !== 'false') {
+        searchParams.set('useMock', 'true');
+      }
+    }
+    
+    // 准备搜索参数字符串
+    const searchString = searchParams.toString();
+    const queryString = searchString ? `?${searchString}` : '';
+    
+    // Navigate to the clarification page with the goal title as state
+    navigate(`/clarify-new${queryString}`, {
+      state: {
+        goalTitle: userInput.trim(),
+        lang: language
+      }
+    });
+    
+    // Close the dialog
     onClose();
   };
   
