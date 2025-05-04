@@ -62,9 +62,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ onCreatePlan }) => {
         transition={{ delay: 0.2, duration: 0.5 }}
       >
         <h3 className="text-2xl font-bold mb-3 text-gray-800">{t('dashboard.emptyTitle')}</h3>
-        <p className="text-gray-500 mb-8 max-w-md text-base">
-          {t('dashboard.emptyCTA')}
-        </p>
+        <p className="text-gray-500 mb-8 max-w-md text-base"></p>
       </motion.div>
       
       <motion.div

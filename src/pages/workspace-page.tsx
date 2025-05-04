@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '../components/ui/button';
 import AIChat, { Message } from '../components/features/ai-chat/ai-chat';
 import CommandPalette from '../components/features/command/command-palette';
@@ -11,7 +11,15 @@ interface FileContents {
 
 const WorkspacePage: React.FC = () => {
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
+  const [leftSidebarWidth, setLeftSidebarWidth] = useState(256); // Default width of 64 in rem (w-64)
+  const [isLeftResizing, setIsLeftResizing] = useState(false);
+  const leftResizingRef = useRef<{ startX: number; startWidth: number } | null>(null);
+  
   const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
+  const [rightSidebarWidth, setRightSidebarWidth] = useState(384); // Default width of 96 in rem (w-96)
+  const [isResizing, setIsResizing] = useState(false);
+  const resizingRef = useRef<{ startX: number; startWidth: number } | null>(null);
+  
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [openFiles, setOpenFiles] = useState(['workspace.txt']);
   const [currentFile, setCurrentFile] = useState('workspace.txt');
@@ -186,6 +194,76 @@ const WorkspacePage: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // 处理左侧边栏拖拽调整宽度
+  const handleLeftResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsLeftResizing(true);
+    leftResizingRef.current = {
+      startX: e.clientX,
+      startWidth: leftSidebarWidth
+    };
+  };
+
+  useEffect(() => {
+    const handleLeftResizeMouseMove = (e: MouseEvent) => {
+      if (!isLeftResizing || !leftResizingRef.current) return;
+      
+      const delta = e.clientX - leftResizingRef.current.startX;
+      const newWidth = Math.max(200, Math.min(500, leftResizingRef.current.startWidth + delta));
+      setLeftSidebarWidth(newWidth);
+    };
+
+    const handleLeftResizeMouseUp = () => {
+      setIsLeftResizing(false);
+      leftResizingRef.current = null;
+    };
+
+    if (isLeftResizing) {
+      document.addEventListener('mousemove', handleLeftResizeMouseMove);
+      document.addEventListener('mouseup', handleLeftResizeMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleLeftResizeMouseMove);
+      document.removeEventListener('mouseup', handleLeftResizeMouseUp);
+    };
+  }, [isLeftResizing]);
+
+  // 处理右侧边栏拖拽调整宽度
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    resizingRef.current = {
+      startX: e.clientX,
+      startWidth: rightSidebarWidth
+    };
+  };
+
+  useEffect(() => {
+    const handleResizeMouseMove = (e: MouseEvent) => {
+      if (!isResizing || !resizingRef.current) return;
+      
+      const delta = resizingRef.current.startX - e.clientX;
+      const newWidth = Math.max(280, Math.min(800, resizingRef.current.startWidth + delta));
+      setRightSidebarWidth(newWidth);
+    };
+
+    const handleResizeMouseUp = () => {
+      setIsResizing(false);
+      resizingRef.current = null;
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleResizeMouseMove);
+      document.addEventListener('mouseup', handleResizeMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleResizeMouseMove);
+      document.removeEventListener('mouseup', handleResizeMouseUp);
+    };
+  }, [isResizing]);
+
   // 渲染行号和文本内容
   const renderFileContent = (content: string) => {
     const lines = content.split('\n');
@@ -257,7 +335,12 @@ const WorkspacePage: React.FC = () => {
       {/* 主体内容 */}
       <div className="flex-1 flex overflow-hidden">
         {/* 左侧边栏 - 文件浏览 */}
-        <div className={`bg-gray-800 text-white flex flex-col ${isLeftSidebarCollapsed ? 'w-14' : 'w-64'} transition-all duration-300 border-r border-gray-700`}>
+        <div 
+          className={`bg-gray-800 text-white flex flex-col ${
+            isLeftSidebarCollapsed ? 'w-14' : ''
+          } ${isLeftResizing ? '' : 'transition-all duration-300'} border-r border-gray-700`}
+          style={{ width: isLeftSidebarCollapsed ? undefined : `${leftSidebarWidth}px` }}
+        >
           <div className="flex items-center justify-between p-4 border-b border-gray-700">
             <h2 className={`font-medium ${isLeftSidebarCollapsed ? 'hidden' : 'block'}`}>文件浏览器</h2>
             <button 
@@ -291,16 +374,27 @@ const WorkspacePage: React.FC = () => {
                       setCurrentFile(fileName);
                     }}
                   >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
-                    <span>{fileName}</span>
+                    <span className="truncate">{fileName}</span>
                   </div>
                 ))}
               </div>
             )}
           </div>
         </div>
+
+        {/* 可调整大小的左侧分割线 */}
+        {!isLeftSidebarCollapsed && (
+          <div 
+            className={`w-1.5 hover:bg-blue-300 cursor-col-resize relative ${isLeftResizing ? 'bg-blue-400' : 'bg-transparent'}`}
+            onMouseDown={handleLeftResizeMouseDown}
+            aria-label="调整文件浏览器大小"
+          >
+            <div className="absolute inset-y-0 -left-1 -right-1" />
+          </div>
+        )}
 
         {/* 中央工作区 - Cursor风格 */}
         <div className="flex-1 overflow-auto bg-white flex flex-col">
@@ -348,29 +442,26 @@ const WorkspacePage: React.FC = () => {
           </div>
         </div>
 
-        {/* 右侧边栏 - AI助手 (Cursor风格) */}
-        <div className={`bg-white border-l border-gray-200 flex flex-col ${isRightSidebarCollapsed ? 'w-14' : 'w-96'} transition-all duration-300`}>
-          <div className="flex items-center justify-between p-3 border-b border-gray-200">
-            <h2 className={`font-medium text-sm ${isRightSidebarCollapsed ? 'hidden' : 'block'}`}></h2>
-            <button 
-              onClick={() => setIsRightSidebarCollapsed(!isRightSidebarCollapsed)}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              {isRightSidebarCollapsed ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                </svg>
-              )}
-            </button>
+        {/* 可调整大小的右侧分割线 */}
+        {!isRightSidebarCollapsed && (
+          <div 
+            className={`w-1.5 hover:bg-blue-300 cursor-col-resize relative ${isResizing ? 'bg-blue-400' : 'bg-transparent'}`}
+            onMouseDown={handleResizeMouseDown}
+            aria-label="调整聊天窗口大小"
+          >
+            <div className="absolute inset-y-0 -left-1 -right-1" />
           </div>
-          
-          {/* 集成AI聊天组件 */}
-          <div className="flex-1 overflow-hidden">
-            {!isRightSidebarCollapsed ? (
+        )}
+
+        {/* 右侧边栏 - AI助手 (Cursor风格) */}
+        <div 
+          className={`bg-white border-l border-gray-200 flex flex-col ${
+            isRightSidebarCollapsed ? 'w-14' : ''
+          } ${isResizing ? '' : 'transition-all duration-300'}`}
+          style={{ width: isRightSidebarCollapsed ? undefined : `${rightSidebarWidth}px` }}
+        >
+          {!isRightSidebarCollapsed && (
+            <div className="flex-1 overflow-hidden">
               <AIChat 
                 initialMessages={[
                   {
@@ -381,20 +472,23 @@ const WorkspacePage: React.FC = () => {
                   }
                 ]}
                 onSendMessage={handleSendMessage}
+                onClose={() => setIsRightSidebarCollapsed(true)}
               />
-            ) : (
-              <div className="h-full flex flex-col items-center pt-4">
-                <button 
-                  className="text-blue-600 hover:text-blue-800"
-                  onClick={() => setIsRightSidebarCollapsed(false)}
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                  </svg>
-                </button>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
+          
+          {isRightSidebarCollapsed && (
+            <div className="h-full flex flex-col items-center pt-4">
+              <button 
+                className="text-blue-600 hover:text-blue-800"
+                onClick={() => setIsRightSidebarCollapsed(false)}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -24,11 +24,13 @@ type AIMode = 'agent' | 'chat' | 'manual';
 interface AIChatProps {
   initialMessages?: Message[];
   onSendMessage?: (message: string, references?: string[], imageUrl?: string) => Promise<string>;
+  onClose?: () => void;
 }
 
 const AIChat: React.FC<AIChatProps> = ({ 
   initialMessages = [], 
-  onSendMessage 
+  onSendMessage,
+  onClose
 }) => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [inputValue, setInputValue] = useState('');
@@ -53,6 +55,7 @@ const AIChat: React.FC<AIChatProps> = ({
   const modelDropdownRef = useRef<HTMLDivElement>(null);
   const modeDropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   
   // 处理点击外部关闭下拉菜单
   useEffect(() => {
@@ -85,6 +88,24 @@ const AIChat: React.FC<AIChatProps> = ({
       inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 200)}px`;
     }
   }, [inputValue]);
+
+  // 监听容器大小变化
+  useEffect(() => {
+    if (!chatContainerRef.current) return;
+    
+    const resizeObserver = new ResizeObserver(() => {
+      // 强制更新滚动位置以确保消息可见
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
+      }
+    });
+    
+    resizeObserver.observe(chatContainerRef.current);
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   const generateId = () => {
     return Date.now().toString(36) + Math.random().toString(36).substring(2);
@@ -273,12 +294,13 @@ const AIChat: React.FC<AIChatProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white text-gray-800">
+    <div className="flex flex-col h-full bg-white text-gray-800" ref={chatContainerRef}>
       {/* Cursor风格头部 */}
-      <div className="px-3 py-2.5 flex justify-between items-center bg-gray-50 border-b border-gray-200">
-        <div className="flex items-center">
+      <div className="px-3 py-2.5 flex justify-between items-center bg-gray-50">
+        <div className="flex-1 text-xs font-medium text-gray-700 truncate">AI 助手</div>
+        <div className="flex items-center space-x-2">
           {/* 模型选择下拉菜单 */}
-          <div className="relative mr-2" ref={modelDropdownRef}>
+          <div className="relative" ref={modelDropdownRef}>
             <button 
               className="h-7 text-xs rounded flex items-center px-2 bg-white hover:bg-gray-100 text-gray-700 border border-gray-300"
               onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
@@ -286,14 +308,15 @@ const AIChat: React.FC<AIChatProps> = ({
               <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-              {selectedModel}
+              <span className="hidden sm:inline">{selectedModel}</span>
+              <span className="sm:hidden">AI</span>
               <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
             
             {isModelDropdownOpen && (
-              <div className="absolute left-0 mt-1 w-48 rounded-md shadow-lg z-10 bg-white border border-gray-200">
+              <div className="absolute right-0 mt-1 w-48 rounded-md shadow-lg z-10 bg-white border border-gray-200">
                 <div className="py-1">
                   <button
                     className={`block px-4 py-2 text-xs w-full text-left ${
@@ -339,14 +362,15 @@ const AIChat: React.FC<AIChatProps> = ({
               className="h-7 text-xs rounded flex items-center px-2 bg-white hover:bg-gray-100 text-gray-700 border border-gray-300"
               onClick={() => setIsModeDropdownOpen(!isModeDropdownOpen)}
             >
-              {getModeLabel()}
+              <span className="hidden sm:inline">{getModeLabel()}</span>
+              <span className="sm:hidden">模式</span>
               <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
             
             {isModeDropdownOpen && (
-              <div className="absolute left-0 mt-1 w-32 rounded-md shadow-lg z-10 bg-white border border-gray-200">
+              <div className="absolute right-0 mt-1 w-32 rounded-md shadow-lg z-10 bg-white border border-gray-200">
                 <div className="py-1">
                   <button
                     className={`block px-4 py-2 text-xs w-full text-left ${
@@ -385,6 +409,19 @@ const AIChat: React.FC<AIChatProps> = ({
               </div>
             )}
           </div>
+          
+          {/* 关闭按钮 */}
+          {onClose && (
+            <button 
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+              aria-label="关闭AI助手"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
       
@@ -423,12 +460,13 @@ const AIChat: React.FC<AIChatProps> = ({
       
       {/* 显示上传的图片预览 */}
       {imageUrl && (
-        <div className="px-3 pt-2 bg-white border-t border-gray-100">
+        <div className="px-3 pt-2 bg-white">
           <div className="relative inline-block">
             <img src={imageUrl} alt="Uploaded" className="max-h-32 rounded-md border border-gray-300" />
             <button 
               className="absolute top-1 right-1 bg-gray-800 bg-opacity-70 text-white rounded-full p-1"
               onClick={clearImage}
+              aria-label="删除图片"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -439,7 +477,7 @@ const AIChat: React.FC<AIChatProps> = ({
       )}
       
       {/* 底部输入区域 - Cursor风格 */}
-      <div className="px-3 pt-2 pb-3 bg-white border-t border-gray-100">
+      <div className="px-3 pt-2 pb-3 bg-white">
         {/* 显示已选择的引用文件 */}
         {references.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-2 text-gray-700">
@@ -449,10 +487,11 @@ const AIChat: React.FC<AIChatProps> = ({
                 key={file} 
                 className="text-xs rounded px-1.5 py-0.5 flex items-center bg-blue-100 text-blue-800"
               >
-                <span>{file}</span>
+                <span className="truncate max-w-[150px]">{file}</span>
                 <button 
                   onClick={() => handleRemoveReference(file)}
-                  className="ml-1 text-opacity-70 hover:text-opacity-100"
+                  className="ml-1 text-opacity-70 hover:text-opacity-100 flex-shrink-0"
+                  aria-label={`删除引用 ${file}`}
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -478,19 +517,20 @@ const AIChat: React.FC<AIChatProps> = ({
           />
           
           {/* 底部操作栏 */}
-          <div className="flex justify-between items-center px-3 py-2 bg-gray-50 border-t border-gray-200">
-            <div className="flex items-center space-x-3">
-              <div className="text-xs text-gray-500">按 Enter 发送，Shift+Enter 换行</div>
+          <div className="flex flex-wrap justify-between items-center px-3 py-2 bg-gray-50 gap-2">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <div className="text-xs text-gray-500 whitespace-nowrap">按 Enter 发送</div>
               
               {/* 引用文件按钮 */}
               <button
                 onClick={() => setShowReferenceSelector(!showReferenceSelector)}
                 className="text-xs flex items-center text-gray-600 hover:text-gray-700"
+                aria-label="引用文件"
               >
-                <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <span>引用文件</span>
+                <span className="whitespace-nowrap">引用文件</span>
               </button>
               
               {/* 上传图片按钮 */}
@@ -504,11 +544,12 @@ const AIChat: React.FC<AIChatProps> = ({
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="text-xs flex items-center text-gray-600 hover:text-gray-700"
+                aria-label="上传图片"
               >
-                <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span>上传图片</span>
+                <span className="whitespace-nowrap">上传图片</span>
               </button>
               
               {/* 语音转文字按钮 */}
@@ -519,22 +560,24 @@ const AIChat: React.FC<AIChatProps> = ({
                     ? 'text-red-500' 
                     : 'text-gray-600 hover:text-gray-700'
                 }`}
+                aria-label={isRecording ? "停止语音录入" : "语音输入"}
               >
-                <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
-                <span>{isRecording ? "录音中..." : "语音输入"}</span>
+                <span className="whitespace-nowrap">{isRecording ? "录音中..." : "语音输入"}</span>
               </button>
             </div>
             
             <Button 
               onClick={handleSendMessage}
               disabled={(!inputValue.trim() && !imageUrl) || status !== 'idle'}
-              className={`h-7 px-3 text-sm font-medium ${
+              className={`h-7 px-3 text-sm font-medium flex-shrink-0 ${
                 (!inputValue.trim() && !imageUrl) || status !== 'idle'
                   ? 'opacity-50 cursor-not-allowed'
                   : ''
               } bg-blue-600 hover:bg-blue-700 text-white`}
+              aria-label="发送消息"
             >
               发送
             </Button>
@@ -554,10 +597,10 @@ const AIChat: React.FC<AIChatProps> = ({
                     onClick={() => handleReferenceSelect(file)}
                   >
                     <div className="flex items-center">
-                      <svg className="w-3.5 h-3.5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5 mr-2 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      {file}
+                      <span className="truncate">{file}</span>
                     </div>
                   </div>
                 ))}

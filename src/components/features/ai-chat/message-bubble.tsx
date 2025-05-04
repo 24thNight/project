@@ -62,7 +62,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isDarkMode = fal
       // 添加代码块之前的文本
       if (match.index > lastIndex) {
         parts.push(
-          <span key={`text-${lastIndex}`} className="whitespace-pre-wrap">
+          <span key={`text-${lastIndex}`} className="whitespace-pre-wrap break-words">
             {content.substring(lastIndex, match.index)}
           </span>
         );
@@ -74,7 +74,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isDarkMode = fal
       parts.push(
         <div key={`code-${match.index}`} className={`my-2 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-800'} text-gray-200 p-3 rounded-md overflow-x-auto`}>
           <div className="text-xs text-gray-400 mb-1">{language}</div>
-          <pre className="font-mono text-sm">{code}</pre>
+          <pre className="font-mono text-sm overflow-x-auto">{code}</pre>
         </div>
       );
 
@@ -84,19 +84,19 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isDarkMode = fal
     // 添加最后一部分文本（如果有）
     if (lastIndex < content.length) {
       parts.push(
-        <span key={`text-${lastIndex}`} className="whitespace-pre-wrap">
+        <span key={`text-${lastIndex}`} className="whitespace-pre-wrap break-words">
           {content.substring(lastIndex)}
         </span>
       );
     }
 
-    return parts.length > 0 ? parts : <span className="whitespace-pre-wrap">{content}</span>;
+    return parts.length > 0 ? parts : <span className="whitespace-pre-wrap break-words">{content}</span>;
   };
 
   return (
-    <div className="mb-6">
+    <div className="mb-6 max-w-full">
       {/* 消息头部 - Cursor风格 */}
-      <div className={`flex items-center gap-2 mb-2 ${
+      <div className={`flex flex-wrap items-center gap-x-2 gap-y-1 mb-2 ${
         message.role === 'system' ? 'hidden' : ''
       }`}>
         {/* 头像 */}
@@ -113,7 +113,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isDarkMode = fal
         ) : null}
         
         {/* 角色名称 */}
-        <div className={`text-xs font-medium ${
+        <div className={`text-xs font-medium flex-shrink-0 ${
           message.role === 'assistant' 
             ? (isDarkMode ? 'text-gray-300' : 'text-gray-700')
             : message.role === 'user'
@@ -135,10 +135,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isDarkMode = fal
                     : (isDarkMode ? 'bg-gray-800 text-gray-300 border border-gray-700' : 'bg-gray-100 text-gray-700')
                 }`}
               >
-                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <span>{file}</span>
+                <span className="truncate max-w-[120px]">{file}</span>
               </div>
             ))}
           </div>
@@ -147,16 +147,28 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isDarkMode = fal
         {/* 时间戳 */}
         <div className={`text-xs ${
           isDarkMode ? 'text-gray-500' : 'text-gray-400'
-        } ml-auto`}>
+        } ml-auto flex-shrink-0`}>
           {formatTime(message.timestamp)}
         </div>
       </div>
       
       {/* 消息内容 - Cursor风格 */}
-      <div className={`pl-7 ${getContentStyle()}`}>
-        <div className="text-sm">
+      <div className={`pl-7 ${getContentStyle()} overflow-hidden`}>
+        <div className="text-sm overflow-wrap-anywhere">
           {renderContent(message.content)}
         </div>
+        
+        {/* 图片预览 */}
+        {message.imageUrl && (
+          <div className="mt-2">
+            <img 
+              src={message.imageUrl} 
+              alt="Attached" 
+              className="max-w-full h-auto rounded-md border border-gray-300"
+              style={{ maxHeight: '200px' }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

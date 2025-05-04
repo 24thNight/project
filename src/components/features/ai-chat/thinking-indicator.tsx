@@ -7,9 +7,9 @@ interface ThinkingIndicatorProps {
 
 const ThinkingIndicator: React.FC<ThinkingIndicatorProps> = ({ isDarkMode = false }) => {
   return (
-    <div className="mb-6">
+    <div className="mb-6 max-w-full">
       {/* 消息头部 - Cursor风格 */}
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
         {/* AI头像 */}
         <div className={`w-5 h-5 rounded-full flex-shrink-0 overflow-hidden ${isDarkMode ? 'bg-gray-700' : 'bg-blue-100'} flex items-center justify-center`}>
           <svg className={`w-3.5 h-3.5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -19,18 +19,18 @@ const ThinkingIndicator: React.FC<ThinkingIndicatorProps> = ({ isDarkMode = fals
       </div>
       
       {/* 思考中指示器 - Cursor风格 */}
-      <div className="pl-7">
+      <div className="pl-7 overflow-hidden">
         <div className={`inline-flex items-center rounded-md py-1 px-2.5 ${
           isDarkMode 
             ? 'bg-gray-800 border border-gray-700' 
             : 'bg-gray-100 border border-gray-200'
         }`}>
-          <span className={`text-xs mr-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>思考中</span>
-          <div className="flex space-x-1">
+          <span className={`text-xs mr-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} flex-shrink-0`}>思考中</span>
+          <div className="flex space-x-1 flex-shrink-0">
             {[0, 1, 2].map((i) => (
               <motion.div
                 key={i}
-                className={`h-1.5 w-1.5 ${isDarkMode ? 'bg-blue-400' : 'bg-blue-500'} rounded-full`}
+                className={`h-1.5 w-1.5 ${isDarkMode ? 'bg-blue-400' : 'bg-blue-500'} rounded-full flex-shrink-0`}
                 animate={{
                   scale: [1, 1.2, 1],
                   opacity: [0.6, 1, 0.6]

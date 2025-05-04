@@ -4,7 +4,24 @@ module.exports = {
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      utilities: {
+        '.overflow-wrap-anywhere': {
+          'overflow-wrap': 'anywhere',
+          'word-break': 'break-word'
+        }
+      }
+    },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.overflow-wrap-anywhere': {
+          'overflow-wrap': 'anywhere',
+          'word-break': 'break-word'
+        }
+      };
+      addUtilities(newUtilities);
+    }
+  ],
 }; 
