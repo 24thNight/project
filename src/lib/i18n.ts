@@ -96,7 +96,7 @@ export const translations = {
   },
   zh: {
     dashboard: {
-      title: "任务计划工作台",
+      title: "任务计划",
       emptyTitle: "你还没有任务",
       emptyCTA: "规划你的第一个大事",
       focusTask: "焦点任务",

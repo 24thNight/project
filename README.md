@@ -1,8 +1,8 @@
-# 任务计划工作台 (Task Planning Dashboard)
+# 任务计划 (Task Planning Dashboard)
 
-任务计划工作台是一个现代化的任务管理应用，帮助用户规划、跟踪和完成各种任务和项目。应用采用禅意设计风格，专注于简洁与效率，为用户提供清晰直观的任务管理体验。
+任务计划是一个现代化的任务管理应用，帮助用户规划、跟踪和完成各种任务和项目。应用采用禅意设计风格，专注于简洁与效率，为用户提供清晰直观的任务管理体验。
 
-![Dashboard Screenshot](https://via.placeholder.com/800x450.png?text=任务计划工作台)
+![Dashboard Screenshot](https://via.placeholder.com/800x450.png?text=任务计划)
 
 ## 功能特性
 

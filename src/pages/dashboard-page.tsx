@@ -177,7 +177,7 @@ const DashboardPage = () => {
         <div className="max-w-7xl mx-auto py-6">
           {/* 标题区域 */}
           <div className="px-4 mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">{t('dashboard.title')}</h2>
+            {/* 删除标题，根据要求不显示"任务计划" */}
           </div>
 
           {/* Tab导航 */}
