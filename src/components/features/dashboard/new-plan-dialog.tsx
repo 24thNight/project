@@ -47,7 +47,7 @@ const NewPlanDialog: React.FC<NewPlanDialogProps> = ({ isOpen, onClose }) => {
   const handleNext = () => {
     if (!userInput.trim()) return;
     
-    devLog(`[Dialog] Preparing to navigate to clarification page with goal: ${userInput.trim()}`);
+    devLog(`[Dialog] Preparing to navigate to workspace with plan: ${userInput.trim()}`);
     
     // 获取当前URL中的查询参数，如果有的话保留
     const searchParams = new URLSearchParams(window.location.search);
@@ -60,19 +60,17 @@ const NewPlanDialog: React.FC<NewPlanDialogProps> = ({ isOpen, onClose }) => {
       }
     }
     
+    // 添加plan参数
+    searchParams.set('plan', encodeURIComponent(userInput.trim()));
+    
     // 准备搜索参数字符串
     const searchString = searchParams.toString();
     const queryString = searchString ? `?${searchString}` : '';
     
-    // Navigate to the clarification page with the goal title as state
-    navigate(`/clarify-new${queryString}`, {
-      state: {
-        goalTitle: userInput.trim(),
-        lang: language
-      }
-    });
+    // 导航到工作区页面
+    navigate(`/workspace${queryString}`);
     
-    // Close the dialog
+    // 关闭对话框
     onClose();
   };
   
