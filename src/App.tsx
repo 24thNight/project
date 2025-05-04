@@ -7,6 +7,7 @@ import ClarifyPage from './pages/clarify-page';
 import PlanPage from './pages/plan-page';
 import ApiTest from './components/features/dashboard/api-test';
 import ClarificationPage from './pages/clarification-page';
+import WorkspacePage from './pages/workspace-page';
 
 function App() {
   return (
@@ -18,13 +19,14 @@ function App() {
           <Route path="/clarify-new" element={<ClarificationPage />} />
           <Route path="/plan" element={<PlanPage />} />
           <Route path="/api-test" element={<ApiTest />} />
-          {/* Redirect to dashboard for now, these pages would be implemented later */}
-          <Route path="/start" element={<Navigate to="/dashboard" />} />
-          <Route path="/execution" element={<Navigate to="/dashboard" />} />
-          <Route path="/summary" element={<Navigate to="/dashboard" />} />
-          <Route path="/recycle" element={<Navigate to="/dashboard" />} />
-          <Route path="/focus" element={<Navigate to="/dashboard" />} />
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="/workspace" element={<WorkspacePage />} />
+          {/* Redirect to workspace for now */}
+          <Route path="/start" element={<Navigate to="/workspace" />} />
+          <Route path="/execution" element={<Navigate to="/workspace" />} />
+          <Route path="/summary" element={<Navigate to="/workspace" />} />
+          <Route path="/recycle" element={<Navigate to="/workspace" />} />
+          <Route path="/focus" element={<Navigate to="/workspace" />} />
+          <Route path="*" element={<Navigate to="/workspace" />} />
         </Routes>
       </Router>
       <Toaster position="top-right" richColors closeButton />
