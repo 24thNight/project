@@ -60,29 +60,22 @@ const TopNav: React.FC<TopNavProps> = ({ activeTab, onChangeTab }) => {
   ];
 
   return (
-    <div className="mx-auto px-4 py-3 rounded-full bg-white border border-gray-200 inline-block shadow-sm">
-      <div className="flex space-x-8 items-center">
+    <div className="w-full max-w-6xl mx-auto px-4">
+      <div className="flex space-x-4 border-b border-gray-200">
         {navItems.map((item) => (
           <button
             key={item.id}
             className={cn(
-              "flex flex-col items-center justify-center outline-none",
+              "flex items-center space-x-2 px-4 py-3 text-sm font-medium transition-colors",
               activeTab === item.id 
-                ? "text-gray-900" 
-                : "text-gray-400 hover:text-gray-600"
+                ? "text-blue-600 border-b-2 border-blue-600 -mb-[1px]" 
+                : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
             )}
             onClick={() => onChangeTab(item.id)}
             aria-label={t(item.label)}
           >
-            <div className={cn(
-              "p-2 rounded-full", 
-              activeTab === item.id 
-                ? "bg-gray-100"
-                : "hover:bg-gray-50"
-            )}>
-              {item.icon}
-            </div>
-            <span className="text-xs mt-1">{t(item.label)}</span>
+            <span className="opacity-80">{item.icon}</span>
+            <span>{t(item.label)}</span>
           </button>
         ))}
       </div>

@@ -9,6 +9,7 @@ export const translations = {
       progress: "Progress",
       tasksToday: "Today's Tasks",
       noStage: "No Stage",
+      search: "Search plans",
       actions: {
         enter: "Enter",
         summary: "Summary",
@@ -103,6 +104,7 @@ export const translations = {
       progress: "进度",
       tasksToday: "今日任务",
       noStage: "无阶段",
+      search: "搜索计划",
       actions: {
         enter: "进入",
         summary: "总结",
@@ -200,6 +202,7 @@ export type TranslationKey =
   | 'dashboard.progress'
   | 'dashboard.tasksToday'
   | 'dashboard.noStage'
+  | 'dashboard.search'
   | 'dashboard.actions.enter'
   | 'dashboard.actions.summary'
   | 'dashboard.actions.delete'
